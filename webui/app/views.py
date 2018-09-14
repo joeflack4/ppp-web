@@ -24,9 +24,7 @@ except ModuleNotFoundError:
 
 
 class IndexView(MethodView):
-    """
-    Index view class with two handlers for GET and POST requests
-    """
+    """Index view class with two handlers for GET and POST requests."""
     @staticmethod
     def get():
         """Get method."""
@@ -69,12 +67,12 @@ class IndexView(MethodView):
 
         # TODO: This hard-makes PPP conv to HTML. Change to doc if doc, etc.
         command_line = \
-            self._build_pmix_ppp_tool_run_cmd(in_file_path=temp_file.name,
+            self._build_ppp_ppp_tool_run_cmd(in_file_path=temp_file.name,
                                               out_format='html',
                                               out_file_path=html_file_path)
         _, stderr = self._run_background_process(command_line)
 
-        # if pmix.ppp tool wrote something to stderr, we should show it to user
+        # if ppp.ppp tool wrote something to stderr, we should show it to user
         if stderr:
             flash("STDERR:\n{}".format(stderr), "error")
             return redirect(url_for('index'))
@@ -173,8 +171,8 @@ class IndexView(MethodView):
         return stdout, stderr
 
     @staticmethod
-    def _build_pmix_ppp_tool_run_cmd(in_file_path, out_format, out_file_path):
-        """This method build command line command to run pmix.ppp tool.
+    def _build_ppp_ppp_tool_run_cmd(in_file_path, out_format, out_file_path):
+        """This method build command line command to run ppp tool.
 
         Returns:
             string: Command.
