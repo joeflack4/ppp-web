@@ -94,7 +94,9 @@ push-production-heroku:
 	git checkout master; \
 	git branch -D production; \
 	git checkout -b production; \
-	git push -u trunk production --force
+	git push -u trunk production --force; \
+	open https://dashboard.heroku.com/apps/ppp-web/activity; \
+	open https://circleci.com/gh/PMA-2020/workflows/ppp-web
 push-staging-heroku:
 	git status; \
 	printf "\nGit status should have reported 'nothing to commit, working tree\
@@ -103,7 +105,9 @@ push-staging-heroku:
 	git checkout develop; \
 	git branch -D staging; \
 	git checkout -b staging; \
-	git push -u trunk staging --force
+	git push -u trunk staging --force; \
+	open https://dashboard.heroku.com/apps/ppp-web-staging/activity; \
+	open https://circleci.com/gh/PMA-2020/workflows/ppp-web
 serve-production: push-production-heroku
 serve-staging: push-staging-heroku
 production: push-production-heroku
