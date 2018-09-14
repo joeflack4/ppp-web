@@ -167,7 +167,11 @@ logs-staging: logs-staging-heroku
 upgrade-ppp:
 	python3 -m pip uninstall odk-ppp; python3 -m pip install \
 	--no-cache-dir --upgrade odk-ppp; \
-	pip freeze > requirements-lock.txt
+	pip freeze > requirements-lock.txt; \
+	echo ""; \
+	echo "Warning: Sometimes the cache is slow to update. You may need to run \
+	this command twice or more to truly update to the most recent version of \
+	ppp, if it was very recently uploaded to PyPi."
 update-ppp: upgrade-ppp
 ppp-update: upgrade-ppp
 ppp-upgrade: upgrade-ppp
