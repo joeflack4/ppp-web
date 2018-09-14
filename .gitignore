@@ -6,4 +6,5 @@ dev/
 env/
 logs/
 *.py[cd]
-test/files/ignored/*
+ignored/*
+output/*

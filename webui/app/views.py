@@ -164,8 +164,7 @@ class IndexView(MethodView):
         """
 
         args = shlex.split(command_line)
-        process = subprocess.Popen(args,
-                                   stdout=subprocess.PIPE,
+        process = subprocess.Popen(args, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         process.wait()
         stdout = process.stdout.read().decode().strip()
@@ -174,18 +173,17 @@ class IndexView(MethodView):
         return stdout, stderr
 
     @staticmethod
-    def _build_pmix_ppp_tool_run_cmd(in_file_path, out_format,
-                                     out_file_path):
+    def _build_pmix_ppp_tool_run_cmd(in_file_path, out_format, out_file_path):
         """This method build command line command to run pmix.ppp tool.
 
         Returns:
             string: Command.
         """
-        language = request.form.get('language')
-        preset = request.form.get('preset', 'developer')
-        options = request.form.getlist('options')
-        if preset != 'custom':
-            options = ['preset ' + preset]
+        language = request.form.get('language', 'English')
+        preset = request.form.get('preset', 'minimal')
+        # options = request.form.getlist('options')
+        # if preset != 'custom':
+        #     options = ['preset ' + preset]
 
         python_path = 'python'  # TODO move this into the config file
         if 'SERVER_INFO' in os.environ and os.environ['SERVER_INFO'].lower()\
@@ -196,10 +194,12 @@ class IndexView(MethodView):
             python_path,
             '-m ppp',
             shlex.quote(in_file_path),
-            "-l " + language,
-            "-f " + out_format,
-            *('--{}'.format(option) for option in options),
-            "-o " + shlex.quote(out_file_path)
+            "--language " + language,
+            "--format " + out_format,
+            "--preset " + preset,
+            "--template " + "old",
+            "--outpath " + shlex.quote(out_file_path)
+            # *('--{}'.format(option) for option in options),
         ))
 
         return command_line

@@ -1,3 +1,13 @@
+# v1.3.0, 2018-09-14
+## New features
+- Added option for full vs minimal, with default to minimal preset.
+## General updates
+- Template tweaks
+## Developer updates
+- Makefile refactor
+- Refactored requirements
+- Added more tests
+
 # v1.2.1, 2018-07-18
 ## Developer updates
 - Updated makefile command for pushing into production.

@@ -166,7 +166,8 @@ logs-staging: logs-staging-heroku
 ### Dependency Management
 upgrade-ppp:
 	python3 -m pip uninstall odk-ppp; python3 -m pip install \
-	--no-cache-dir --upgrade odk-ppp
+	--no-cache-dir --upgrade odk-ppp; \
+	pip freeze > requirements-lock.txt
 update-ppp: upgrade-ppp
 ppp-update: upgrade-ppp
 ppp-upgrade: upgrade-ppp
