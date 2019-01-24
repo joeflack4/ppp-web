@@ -1,9 +1,11 @@
-pmix
-odk-ppp
+# Dependencies
+odk-ppp>=1.2.12
 Flask
 gunicorn
-pycodestyle
-pydocstyle
-pylint
 xlrd
 XlsxWriter
+
+# Dev dependencies
+pycodestyle==2.4.0
+pydocstyle==2.1.1
+pylint==2.1.1

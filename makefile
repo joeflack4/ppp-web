@@ -204,7 +204,7 @@ install-latest-internal-dependencies:
 	pip install git+https://github.com/PMA-2020/ppp@develop --upgrade
 install:
 	make install-latest-internal-dependencies; \
-	pip install -r requirements-unlocked.txt --no-cache-dir; \
+	pip install -r requirements-unlocked.txt --no-cache-dir --upgrade; \
 	pip freeze > requirements.txt
 #	make upgrade-once
 #upgrade-once:

@@ -14,6 +14,7 @@ from flask import request
 from flask import send_file
 from flask import url_for
 from flask.views import MethodView
+# noinspection PyPackageRequirements
 from ppp import run, OdkException
 
 
@@ -23,6 +24,7 @@ try:
 except ModuleNotFoundError:
     # noinspection PyUnresolvedReferences
     from ppp_web import app_config
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from config import version
 
 
@@ -81,8 +83,11 @@ class IndexView(MethodView):
                                      out_file_path=html_file_path) '''
         is_warning = False
         if stderr:
-            is_warning = stderr.lower().startswith("warning")
-            if is_warning is False:
+            is_debug_msg = stderr.startswith('pydev debugger: process ') and stderr.endswith(' is connecting')
+            is_warning = stderr.lower().startswith('warning')
+            if is_debug_msg:
+                stderr = ''
+            elif is_warning is False:
                 flash("STDERR:\n{}".format(stderr), "error")
                 return redirect(url_for('index'))
 
@@ -201,6 +206,7 @@ class IndexView(MethodView):
         # @Bciar: I commented out next line because not used. -Joe, 2018/10/16
         # redirected_output = sys.stdout = StringIO()
         redirected_error = sys.stderr = StringIO()
+        # noinspection PyBroadException
         try:
             with run(files=[in_file_path],
                      languages=[lang_option],
