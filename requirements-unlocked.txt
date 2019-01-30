@@ -1,7 +1,9 @@
 # Dependencies
+diff-pdf-visually
 odk-ppp>=1.2.12
 Flask
 gunicorn
+selenium
 xlrd
 XlsxWriter
 

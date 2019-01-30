@@ -1,77 +1,141 @@
+"""Selenium tests"""
 import os
 import platform
-import xlrd
 import time
+import selenium.webdriver.chrome.service as service
 from selenium import webdriver
-from pathlib import Path
-from itertools import zip_longest
-from static_methods import get_download_folder
+
+# noinspection PyProtectedMember
 from diff_pdf_visually import pdfdiff
-import sys
+from selenium.common.exceptions import WebDriverException
+
+from ppp_web.config import PROJECT_ROOT_DIR
+from selenium_test.static_methods import get_download_folder
 
 # activity to choose two form files and submit the form, download file
-defaultUrls = {
-  "dev": 'http://localhost:8080',
-  "production": 'http://ppp.pma2020.org/'
+DEFAULT_URLS = {
+  'dev': 'http://localhost:8080',
+  'production': 'http://ppp.pma2020.org/'
 }
 
-browser = webdriver.Chrome()
-browser.get(defaultUrls["production"])
+try:
+    browser = webdriver.Chrome()
+except WebDriverException:
+    this_dir_path = os.path.abspath(os.path.dirname(__file__))
+    driver_path_end = \
+        os.path.join('win32', 'chromedriver.exe') \
+        if platform.system() == 'Windows' \
+        else os.path.join('mac64', 'chromedriver') \
+        if platform.system() == 'Darwin' \
+        else os.path.join('linux64', 'chromedriver') \
+        if platform.system() == 'Linux' \
+        else ''
+    chromedriver_path = \
+        os.path.join(this_dir_path, 'bin', 'chrome_driver', driver_path_end)
+    service = service.Service(chromedriver_path)
+    service.start()
+    # capabilities = {'chrome.binary': '/path/to/custom/chrome'}  # ?
+    # driver = webdriver.Remote(service.service_url, capabilities) # ?
+    # example usage
+    # driver.get('http://www.google.com/xhtml')
+    # time.sleep(5)
+    # driver.quit()
+    browser = webdriver.Chrome()
 
-def mainShot(btnName, ext):
+browser.get(DEFAULT_URLS['production'])
+
+
+def compare_files(ext, download_file_path, filename):
+    """Compare files
+
+    Args:
+        ext (str): file extension
+        download_file_path (str): Path to download file
+        filename (str): file name
+
+    Returns:
+        bool: True if no errors
+    """
+    flag = False
+    base_file_path = os.path.join(PROJECT_ROOT_DIR, 'docs', filename)
+
+    if ext == 'pdf':
+        print(download_file_path + '\n' + base_file_path)
+        flag = pdfdiff(download_file_path, base_file_path)
+    else:
+        with open(download_file_path) as f1:
+            with open(base_file_path) as f2:
+                if f1.read() == f2.read():
+                    flag = True
+
+    print(ext + ' ' + 'success' if flag else 'different' + '!')
+
+    return True
+
+
+def main_shot(btn_name: str, ext: str):
+    """Main shot
+
+    TODO: @bciar Can you add some documentation here?
+      - What does function do? (1 sentence)
+      - What is btn_name?
+
+    Args:
+        btn_name (str):
+        ext (str): file extension
+
+    Returns:
+        bool: True if no errors
+    """
+    # TODO: @bciar do we need "global"? I never use 'global', so i don't know
+    #   Tell me what you think on Slack, and then delete this comment
     global browser
-    path_char = '\\' if platform.system() == 'Windows' else '/'
-    download_file_path = get_download_folder()+path_char+"demo."+ext
+
+    filename_base = 'demo'
+    filename = filename_base + '.' + ext
+
+    # TODO: @bciar I think we shouldn't be using 'path_char'. This is my
+    #  mistake. We
+    #   should use Python's built-in path libraries: os.path, pathlib, ntpath
+    #   After you read this comment, delete it
+    # path_char = '\\' if platform.system() == 'Windows' else '/'
+    download_file_path = os.path.join(get_download_folder(), filename)
+
     if os.path.exists(download_file_path):
         os.remove(download_file_path)
 
-    btnHtmlFormat = browser.find_element_by_id(btnName)
-    btnHtmlFormat.click()
+    btn_html_format = browser.find_element_by_id(btn_name)
+    btn_html_format.click()
 
-    xform_file = str(Path("docs/demo.xlsx").resolve())
-    if platform.system() == 'Windows':
-        xform_file = xform_file.replace("\\", "\\\\")
+    xform_file = \
+        os.path.join(PROJECT_ROOT_DIR, 'docs', filename_base + '.xlsx')
+    # xform_file = str(Path('docs/' + filename_base + 'xlsx').resolve())
+    # if platform.system() == 'Windows':
+    #     xform_file = xform_file.replace('\\', '\\\\')
 
-    file_uploader = browser.find_element_by_id("inFile")
+    file_uploader = browser.find_element_by_id('inFile')
     file_uploader.send_keys(xform_file)
     
-    button_submit = browser.find_element_by_id("btnSubmit")
+    button_submit = browser.find_element_by_id('btnSubmit')
     button_submit.click()
 
     while not os.path.exists(download_file_path):
         time.sleep(1)
 
-    # compare two files
-    flag = False
-    if ext == "pdf":
-        print(download_file_path)
-        print(Path("docs/demo."+ext).resolve())
-
-        flag = pdfdiff(download_file_path, Path("docs/demo."+ext).resolve())
-    else:
-        with open(download_file_path) as f1:
-            with open(Path("docs/demo."+ext).resolve()) as f2:
-                if f1.read() == f2.read():
-                    flag = True
-    if flag:
-        print(ext + ' success!')
-    else:
-        print(ext + ' different!')
-
-    return True
+    return compare_files(ext, download_file_path, filename)
 
 
-task1 = mainShot("btnDocFormat", "doc")
+task1 = main_shot('btnDocFormat', 'doc')
 while not task1:
     time.sleep(1)
 time.sleep(2)
 
-task2 = mainShot("btnHtmlFormat", "html")
+task2 = main_shot('btnHtmlFormat', 'html')
 while not task2:
     time.sleep(1)
 time.sleep(2)
 
-task3 = mainShot("btnPdfFormat", "pdf")
+task3 = main_shot('btnPdfFormat', 'pdf')
 while not task3:
     time.sleep(1)
 time.sleep(2)
