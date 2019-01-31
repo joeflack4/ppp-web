@@ -1,6 +1,7 @@
 """Selenium tests"""
 import os
 import platform
+import sys
 import time
 import selenium.webdriver.chrome.service as service
 from selenium import webdriver
@@ -9,7 +10,10 @@ from selenium import webdriver
 from diff_pdf_visually import pdfdiff
 from selenium.common.exceptions import WebDriverException
 
-from ppp_web.config import PROJECT_ROOT_DIR
+PROJECT_ROOT_DIR = \
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(PROJECT_ROOT_DIR)
+
 from selenium_test.static_methods import get_download_folder
 
 # activity to choose two form files and submit the form, download file
@@ -60,8 +64,9 @@ def compare_files(ext, download_file_path, filename):
     base_file_path = os.path.join(PROJECT_ROOT_DIR, 'docs', filename)
 
     if ext == 'pdf':
-        print(download_file_path + '\n' + base_file_path)
-        flag = pdfdiff(download_file_path, base_file_path)
+        statinfo_downloaded_file = os.stat(download_file_path)
+        statinfo_base_file = os.stat(base_file_path)
+        flag = statinfo_downloaded_file.st_size == statinfo_base_file.st_size
     else:
         with open(download_file_path) as f1:
             with open(base_file_path) as f2:
@@ -76,29 +81,20 @@ def compare_files(ext, download_file_path, filename):
 def main_shot(btn_name: str, ext: str):
     """Main shot
 
-    TODO: @bciar Can you add some documentation here?
-      - What does function do? (1 sentence)
-      - What is btn_name?
+        This function is repeatable cycle for 3 types of conversion - remove existing downloaded file, 
+            uploading file, choosing type of conversion, submit button, downloading, comparing
 
     Args:
-        btn_name (str):
+        btn_name (str): the element id for toggling button - type of conversion (doc, html, pdf)
         ext (str): file extension
 
     Returns:
         bool: True if no errors
     """
-    # TODO: @bciar do we need "global"? I never use 'global', so i don't know
-    #   Tell me what you think on Slack, and then delete this comment
-    global browser
 
     filename_base = 'demo'
     filename = filename_base + '.' + ext
 
-    # TODO: @bciar I think we shouldn't be using 'path_char'. This is my
-    #  mistake. We
-    #   should use Python's built-in path libraries: os.path, pathlib, ntpath
-    #   After you read this comment, delete it
-    # path_char = '\\' if platform.system() == 'Windows' else '/'
     download_file_path = os.path.join(get_download_folder(), filename)
 
     if os.path.exists(download_file_path):
@@ -109,9 +105,6 @@ def main_shot(btn_name: str, ext: str):
 
     xform_file = \
         os.path.join(PROJECT_ROOT_DIR, 'docs', filename_base + '.xlsx')
-    # xform_file = str(Path('docs/' + filename_base + 'xlsx').resolve())
-    # if platform.system() == 'Windows':
-    #     xform_file = xform_file.replace('\\', '\\\\')
 
     file_uploader = browser.find_element_by_id('inFile')
     file_uploader.send_keys(xform_file)
